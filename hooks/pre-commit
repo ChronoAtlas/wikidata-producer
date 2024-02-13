@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+make fix
+git diff --quiet || git add -A
+git diff --cached --quiet \
+    || echo "Pre-commit hook: Changes made by 'make fix' have been added."
+
+exit 0
