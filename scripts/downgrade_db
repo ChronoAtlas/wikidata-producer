@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+
+import sys
+import sqlite3
+from typing import Optional
+from os import listdir
+from os.path import isfile, join
+
+def get_latest_migration_version(conn) -> int:
+    cursor = conn.cursor()
+    cursor.execute("SELECT MAX(version) FROM migrations")
+    latest_version = cursor.fetchone()[0]
+    return latest_version if latest_version is not None else 0
+
+def revert_migration(conn, version) -> None:
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM migrations WHERE version = ?", (version,))
+    conn.commit()
+    print(f"Reverted migration {version}")
+
+def find_latest_migration(migrations_directory, latest_version) -> tuple[Optional[int], Optional[str]]:
+
+    latest_version_str = f"{latest_version:04d}"
+    sql_file_path = None
+    for filename in listdir(migrations_directory):
+        if filename.startswith(latest_version_str) and filename.endswith(".down.sql"):
+            sql_file_path = join(migrations_directory, filename)
+            break
+
+    if sql_file_path and isfile(sql_file_path):
+        with open(sql_file_path, "r") as file:
+            script = file.read()
+            print(f"Gathered downgrade migration from {sql_file_path}")
+            return latest_version, script
+
+    return None, None
+
+def main(migrations_directory, db_file) -> bool:
+    conn = sqlite3.connect(db_file)
+    latest_version = get_latest_migration_version(conn)
+    
+    if latest_version == 0:
+        print("No migrations have been applied.")
+        conn.close()
+        return True
+
+    version, script = find_latest_migration(migrations_directory, latest_version)
+    if script:
+        cursor = conn.cursor()
+        cursor.executescript(script)
+        revert_migration(conn, version)
+        conn.close()
+        return False
+    else:
+        print("No downgrade script found for the latest migration.")
+        conn.close()
+        return True
+
+# Exit codes:
+#   0 -> Downgrade performed
+#   1 -> Db is up to date or no downgrade script found
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print(f"Usage: {sys.argv[0]} <migrations_dir> <db_file>")
+        sys.exit(1)
+
+    print(f"Applying downgrade from {sys.argv[1]} to database {sys.argv[2]}")
+    db_is_up_to_date_or_no_script = main(sys.argv[1], sys.argv[2])
+    if db_is_up_to_date_or_no_script:
+        sys.exit(1)
+    else:
+        sys.exit(0)

@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+echo "Select a database:"
+select dir in $(ls -d ./migrations/*/); do
+    if [ -n "$dir" ]; then
+        selected_dir=$dir
+        break
+    else
+        echo "Invalid input. Please try again."
+    fi
+done
+
+printf 'Enter a name for the migration: '
+read -r migration_name
+
+migration_index=$(printf "%04d" $(( $(ls $selected_dir | grep -o '^[0-9]\+' | sort -n | tail -1) + 1 )))
+up_file_name="${selected_dir}/${migration_index}_${migration_name}.up.sql"
+down_file_name="${selected_dir}/${migration_index}_${migration_name}.down.sql"
+touch $up_file_name $down_file_name
