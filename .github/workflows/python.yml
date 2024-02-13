@@ -1,4 +1,4 @@
-name: Python
+name: Python build
 on: [push, pull_request]
 jobs:
   build:
@@ -35,53 +35,3 @@ jobs:
       with:
         name: package-artifacts
         path: dist/*
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Download artifacts
-      uses: actions/download-artifact@v2
-      with:
-        name: package-artifacts
-        path: dist
-
-    - name: Configure pip for GitHub Packages
-      run: |
-        echo "machine github.com login ${{ github.actor }} password ${{ secrets.GITHUB_TOKEN }}" > ~/.netrc
-        echo "machine api.github.com login ${{ github.actor }} password ${{ secrets.GITHUB_TOKEN }}" >> ~/.netrc
-        pip config set global.index-url https://upload.pypi.org/legacy/
-        pip config set global.extra-index-url https://pypi.org/simple
-
-    - name: Publish package to GitHub Packages
-      run: |
-        python -m pip install twine
-        twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
-      env:
-        TWINE_USERNAME: ${{ github.actor }}
-        TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/
-        asset_name: package.zip
-        asset_content_type: application/zip
