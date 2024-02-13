@@ -4,7 +4,7 @@ from typing import Optional
 import flexidate
 
 
-class BattleEvent:
+class BattleEvent:  # noqa: WPS230
     def __init__(self, wikidata_entry: dict[str, dict[str, str]]) -> None:
         self.id: str = wikidata_entry["battle"]["value"]
         self.name: str = wikidata_entry["battleLabel"]["value"]
@@ -26,7 +26,8 @@ class BattleEvent:
         )
         self.image_url_stub: Optional[str] = (
             wikidata_entry["image"]["value"].replace(
-                "http://commons.wikimedia.org/wiki/Special:FilePath/", ""
+                "http://commons.wikimedia.org/wiki/Special:FilePath/",
+                "",
             )
             if "image" in wikidata_entry
             else None
@@ -35,7 +36,7 @@ class BattleEvent:
         self.checksum: str = self.generate_checksum()
 
     def generate_checksum(self) -> str:
-        sorted_attributes = sorted(self.__dict__.items())
-        concatenated_attributes = "".join(value for _, value in sorted_attributes)
-        hash_object = hashlib.sha256(concatenated_attributes.encode())
+        sorted_attr = sorted(self.__dict__.items())
+        concat_attributes = "".join(value for _, value in sorted_attr)  # noqa: WPS110
+        hash_object = hashlib.sha256(concat_attributes.encode())
         return hash_object.hexdigest()

@@ -5,6 +5,7 @@ install: $(VERSION)
 .PHONY: install-all
 install-all: $(VERSION) install-hooks
 	pip install -e '.[all]'
+	mypy --install-types
 
 .PHONY: install-hooks
 install-hooks:
