@@ -1,0 +1,1 @@
+ALTER TABLE battle_events ADD COLUMN name VARCHAR NOT NULL;
