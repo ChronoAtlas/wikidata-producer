@@ -5,23 +5,28 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, 3.10, 3.11]
+        python-version: [3.9]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         make install
+
     - name: Lint
       run: make lint
+
     - name: Run tests
       run: make test
+
     - name: Create package
       run: make pkg
+
     - name: Upload package artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -34,11 +39,28 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
     - name: Download artifacts
       uses: actions/download-artifact@v2
       with:
         name: package-artifacts
         path: dist
+
+    - name: Configure pip for GitHub Packages
+      run: |
+        echo "machine github.com login ${{ github.actor }} password ${{ secrets.GITHUB_TOKEN }}" > ~/.netrc
+        echo "machine api.github.com login ${{ github.actor }} password ${{ secrets.GITHUB_TOKEN }}" >> ~/.netrc
+        pip config set global.index-url https://upload.pypi.org/legacy/
+        pip config set global.extra-index-url https://pypi.org/simple
+
+    - name: Publish package to GitHub Packages
+      run: |
+        python -m pip install twine
+        twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+      env:
+        TWINE_USERNAME: ${{ github.actor }}
+        TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -49,6 +71,7 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
+
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
