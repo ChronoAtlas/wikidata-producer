@@ -8,8 +8,6 @@ include $(SELF_DIR)/_test.mk
 
 .PHONY: $(VERSION)
 $(VERSION):
-	git describe --tag --always \
-		| grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
-		|| echo "0.0.0" \
-		>$@
+	git describe --tag --always | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' >$@ \
+		|| echo "0.0.0" >$@
 	printf '__version__ = "%s"\n' "$$(cat $@)" >$@
