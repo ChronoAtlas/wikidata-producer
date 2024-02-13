@@ -1,2 +1,2 @@
 def test_main() -> None:
-    return
+    return  # noqa: WPS324
