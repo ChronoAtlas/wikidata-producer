@@ -11,3 +11,4 @@ Prerequisites
 * Python 3.9 or higher
 * GNU Make (if you want to use the make targets)
 * Docker (if you want to develop or test against a local Kafka cluster)
+* docker-compose (if you want to run integration tests)

@@ -30,9 +30,9 @@ jobs:
     - name: Create package
       run: make pkg
     - name: Build image
-      run: docker build . -t cr.kruhlmann.dev/ChronoAtlas/wikidata-producer
+      run: docker build . -t cr.kruhlmann.dev/chrono-atlas/wikidata-producer
     - name: Publish image
-      run: docker push cr.kruhlmann.dev/ChronoAtlas/wikidata-producer
+      run: docker push cr.kruhlmann.dev/chrono-atlas/wikidata-producer
     - name: Upload package artifacts
       uses: actions/upload-artifact@v2
       with:

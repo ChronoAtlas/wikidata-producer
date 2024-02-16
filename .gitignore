@@ -1,5 +1,4 @@
 src/*/version.py
-*.db
 
 # Defaults
 __pycache__/
