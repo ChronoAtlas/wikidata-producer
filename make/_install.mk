@@ -3,7 +3,7 @@ install: $(VERSION)
 	pip install .
 
 .PHONY: install-all
-install-all: $(VERSION) install-hooks
+install-all: $(VERSION)
 	pip install -e '.[all]'
 	mypy --install-types
 

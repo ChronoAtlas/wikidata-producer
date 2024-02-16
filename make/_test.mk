@@ -10,9 +10,9 @@ unit-test: $(VERSION)
 
 .PHONY: integration-test
 integration-test: $(VERSION)
-	docker-compose up -d
+	docker-compose -f tests/docker-compose.yaml up -d
 	-pytest tests/integration_tests
 	ret=$$?
-	docker-compose down
+	docker-compose -f tests/docker-compose.yaml down
 	test "$$ret" = 5 && ret=0
 	exit $$ret
