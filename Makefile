@@ -1,4 +1,4 @@
 COMPONENT = wikidata_producer
 VERSION = src/$(COMPONENT)/version.py
 
-include make/main.mk
+include make/python/main.mk
