@@ -32,11 +32,13 @@ class BattleEvent:  # noqa: WPS230
             if "image" in wikidata_entry
             else None
         )
-        # Always keep this last - and make sure it always uses all attributes.
+        # Always keep this last
         self.checksum: str = self.generate_checksum()
 
     def generate_checksum(self) -> str:
-        sorted_attr = sorted(self.__dict__.items())
-        concat_attributes = "".join(value for _, value in sorted_attr)  # noqa: WPS110
-        hash_object = hashlib.sha256(concat_attributes.encode())
+        sorted_obj_keys = sorted(self.__dict__.keys())
+        str_repr = ""
+        for key in sorted_obj_keys:
+            str_repr += f"{key}:{self.__dict__[key]}"
+        hash_object = hashlib.sha256(str_repr.encode())
         return hash_object.hexdigest()
