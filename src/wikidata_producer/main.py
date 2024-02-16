@@ -4,7 +4,7 @@ import time
 import requests
 import typer
 
-from wikidata_consumer.models import BattleEvent
+from wikidata_producer.models import BattleEvent
 
 app = typer.Typer()
 
