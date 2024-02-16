@@ -17,6 +17,11 @@ def run(
     logging_level: int = logging.INFO,
 ) -> None:
     logging.basicConfig(level=logging_level)
+    logging.info("Using configuration:")
+    logging.info(f"  kafka_conn_str: {kafka_conn_str}")
+    logging.info(f"  kafka_topic: {kafka_topic}")
+    logging.info(f"  sleep_interval: {sleep_interval}")
+    logging.info(f"  logging_level: {logging_level}")
     producer = WikidataProducer(
         kafka_conn_str=kafka_conn_str,
         topic=kafka_topic,
