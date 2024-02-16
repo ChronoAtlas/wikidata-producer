@@ -29,7 +29,7 @@ def kafka_producer() -> WikidataProducer:
     return WikidataProducer(
         kafka_conn_str=KAFKA_CONN_STR,
         topic=KAFKA_TOPIC,
-        wikidata_query=WikidataQuery.BattlesByDate(limit=5),
+        wikidata_query=WikidataQuery.OneRandomBattle,
         sleep_interval=0,
     )
 
@@ -47,7 +47,8 @@ def remove_network(mocker) -> None:
 
 
 def test_producer(
-    kafka_producer: WikidataProducer, kafka_consumer: KafkaConsumer
+    kafka_producer: WikidataProducer,
+    kafka_consumer: KafkaConsumer,
 ) -> None:
     main_thread = Thread(target=kafka_producer.run, daemon=True)
     main_thread.start()
@@ -58,9 +59,3 @@ def test_producer(
         message_found = True
         break
     assert message_found
-
-
-# def test_no_connection(kafka_producer: WikidataProducer, remove_network: None) -> None:
-#     main_thread = Thread(target=kafka_producer.run, daemon=True)
-#     main_thread.start()
-#     main_thread.join(timeout=15)
