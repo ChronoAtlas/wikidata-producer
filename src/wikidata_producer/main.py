@@ -1,9 +1,10 @@
 import logging
 from threading import Thread
 
+from redis import StrictRedis
 import typer
 
-from wikidata_producer import WikidataProducer
+from wikidata_producer import WikidataProducerDaemon
 from wikidata_producer import WikidataQuery
 
 app = typer.Typer()
@@ -13,6 +14,7 @@ app = typer.Typer()
 def run(
     kafka_conn_str: str,
     kafka_topic: str,
+    redis_dsn: str,
     sleep_interval: int = 5,
     logging_level: int = logging.INFO,
 ) -> None:
@@ -20,16 +22,18 @@ def run(
     logging.info("Using configuration:")
     logging.info(f"  kafka_conn_str: {kafka_conn_str}")
     logging.info(f"  kafka_topic: {kafka_topic}")
+    logging.info(f"  redis_dsn: {redis_dsn}")
     logging.info(f"  sleep_interval: {sleep_interval}")
     logging.info(f"  logging_level: {logging_level}")
 
-    producer = WikidataProducer(
-        kafka_conn_str=kafka_conn_str,
-        topic=kafka_topic,
-        wikidata_query=WikidataQuery.BattlesByDate(limit=5),
-        sleep_interval=sleep_interval,
+    daemon = WikidataProducerDaemon(
+        producer=P,
+        redis_dsn=StrictRedis.from_url(
+            url=redis_dsn, encoding="utf-8", decode_responses=True
+        ),
+        sleep_interval_seconds=sleep_interval,
     )
-    main_thread = Thread(target=producer.run, daemon=True)
+    main_thread = Thread(target=daemon.run, daemon=True)
     main_thread.start()
     main_thread.join()
 

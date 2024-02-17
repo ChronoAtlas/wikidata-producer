@@ -1,4 +1,5 @@
-from wikidata_producer.producer import WikidataProducer
-from wikidata_producer.query import WikidataQuery
+from wikidata_producer.daemon import WikidataProducerDaemon
 
-__all__ = ["WikidataProducer", "WikidataQuery"]
+__all__ = [
+    "WikidataProducerDaemon",
+]

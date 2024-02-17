@@ -1,4 +1,5 @@
 src/*/version.py
+redis_cache/
 
 # Defaults
 __pycache__/
