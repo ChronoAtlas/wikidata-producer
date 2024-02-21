@@ -39,7 +39,7 @@ Please make sure that your environment supports Kafka and Redis, and have the se
 
 You need the following installed:
 
-- Python 3.8 or higher.
+- Python 3.10 or higher.
 
 ## Setup
 

@@ -19,8 +19,11 @@ class WikidataHttpSource(WikidataSource):
         }
         headers = {"Accept": "application/json"}
         response = requests.get(
-            self.url, headers=headers, params=params, timeout=5000
-        )  # noqa: WPS432
+            self.url,
+            headers=headers,
+            params=params,
+            timeout=5000,  # noqa: WPS432
+        )
         if response.ok:
             return response.json()["results"]["bindings"]
         logging.error(f"HTTP {response.status_code} on {self.url}")

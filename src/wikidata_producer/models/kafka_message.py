@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Generic, TypeVar
 
 ContentModel = TypeVar("ContentModel")
@@ -13,8 +12,7 @@ class KafkaMessage(Generic[ContentModel]):
         self.message_type = message_type
 
     @property
-    def __dict__(self) -> dict[str, Any]:
-        logging.fatal(self.body.__dict__)
+    def __dict__(self) -> dict[str, Any]:  # type: ignore
         return {
             "body": self.body.__dict__,
             "message_type": self.message_type,
