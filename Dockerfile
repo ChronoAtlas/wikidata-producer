@@ -1,4 +1,6 @@
-FROM cr.kruhlmann.dev/debian-bookworm-python-3.11 AS compile-image
+ARG PYTHON_VERSION=3.11
+
+FROM cr.kruhlmann.dev/debian-bookworm-python-${PYTHON_VERSION} AS compile-image
 COPY --chown=$USERNAME:$USERNAME . .
 USER $USERNAME
 RUN . "$VENV/bin/activate" \
