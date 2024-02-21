@@ -3,14 +3,14 @@ import logging
 import time
 
 import kafka
-import kafka.errors
+import kafka.errors  # noqa: WPS458, WPS301
 
 from wikidata_producer.interchange.producer import Producer
 from wikidata_producer.models.kafka_message import KafkaMessage
 
 
 class KafkaProducer(Producer):
-    def __init__(self, topic: str, conn_str: str, encoding="utf-8") -> None:
+    def __init__(self, topic: str, conn_str: str, encoding: str = "utf-8") -> None:
         self.topic = topic
         self.conn_str = conn_str
         self.encoding = encoding
@@ -20,23 +20,24 @@ class KafkaProducer(Producer):
         self.get_connection()
 
     def serialize_value(self, queue_item: KafkaMessage) -> bytes:
-        return json.dumps(queue_item.json()).encode(self.encoding)
+        return json.dumps(queue_item.__dict__).encode(self.encoding)
 
-    def get_connection(self, force_reconnect=False) -> kafka.KafkaProducer:
+    def get_connection(self, force_reconnect: bool = False) -> kafka.KafkaProducer:
         if self.kafka is not None and not force_reconnect:
             return self.kafka
 
         while True:
-            try:
+            try:  # noqa: WPS229
                 self.kafka = kafka.KafkaProducer(
                     bootstrap_servers=self.conn_str,
                     value_serializer=self.serialize_value,
-                    client_id=f"wikidata-producer",
+                    client_id="wikidata-producer",
+                    api_version=(2, 5, 0),
                 )
                 return self.kafka
             except (kafka.errors.KafkaError, BrokenPipeError) as error:
                 logging.error(error)
-                logging.error(f"Unable to connect to kafka. Retrying in 3 seconds")
+                logging.error("Unable to connect to kafka. Retrying in 3 seconds")
                 time.sleep(3)
 
     def produce(self, payload: KafkaMessage) -> None:

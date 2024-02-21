@@ -1,26 +1,32 @@
+from typing import Any
+
 from wikidata_producer.daemon import WikidataProducerDaemon
-from wikidata_producer.interchange import *
-from wikidata_producer.models import *
+from wikidata_producer.interchange import ChecksumCache
+from wikidata_producer.interchange import Producer
+from wikidata_producer.interchange import WikidataSource
+from wikidata_producer.models import BattleEvent
+from wikidata_producer.models import KafkaMessage
+from wikidata_producer.models import KafkaMessageType
 
 
 class InMemoryCache(ChecksumCache):
-    content = dict()
+    cache_content: dict[str, str] = {}
 
     def get_message_type(self, battle_event: BattleEvent) -> str:
-        existing_checksum = self.content.get(battle_event.id)
+        existing_checksum = self.cache_content.get(battle_event.id)
         if existing_checksum is None:
             return KafkaMessageType.NewBattle
         return KafkaMessageType.BattleUpdate
 
     def save_checksum_with_id(self, battle_event: BattleEvent) -> None:
-        self.content[battle_event.id] = battle_event.checksum
+        self.cache_content[battle_event.id] = battle_event.checksum
 
 
 class OfflineWikidataSource(WikidataSource):
     def __init__(self, battle_events: list[BattleEvent]) -> None:
         self.battle_events = battle_events
 
-    def get_battle_events(
+    def fetch_battle_events(
         self,
         date_start: str,
         date_end: str,
@@ -31,10 +37,10 @@ class OfflineWikidataSource(WikidataSource):
 
 class OfflineProducer(Producer):
     def __init__(self) -> None:
-        self.products: list[KafkaMessage] = []
+        self.products: list[dict[str, Any]] = []
 
     def produce(self, payload: KafkaMessage) -> None:
-        self.products.append(payload)
+        self.products.append(payload.__dict__)
 
     def flush(self) -> None:
         pass  # noqa: WPS420
@@ -43,7 +49,7 @@ class OfflineProducer(Producer):
 def test_daemon() -> None:
     battle_events = [
         BattleEvent(
-            id="a",
+            identifier="a",
             name="",
             date=0,
             location="",
@@ -53,7 +59,7 @@ def test_daemon() -> None:
             image_url_stub="",
         ),
         BattleEvent(
-            id="a",
+            identifier="a",
             name="",
             date=0,
             location="New location",
@@ -77,5 +83,5 @@ def test_daemon() -> None:
     daemon.tick()
 
     assert len(producer.products) == 2
-    assert producer.products[0].message_type == KafkaMessageType.NewBattle
-    assert producer.products[1].message_type == KafkaMessageType.BattleUpdate
+    assert producer.products[0]["message_type"] == KafkaMessageType.NewBattle
+    assert producer.products[1]["message_type"] == KafkaMessageType.BattleUpdate

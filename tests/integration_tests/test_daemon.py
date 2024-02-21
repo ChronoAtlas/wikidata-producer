@@ -5,8 +5,10 @@ from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 import pytest
 
-from wikidata_producer import *
-from wikidata_producer.interchange import *
+from wikidata_producer import WikidataProducerDaemon
+from wikidata_producer.interchange import KafkaProducer
+from wikidata_producer.interchange import RedisChecksumCache
+from wikidata_producer.interchange import WikidataHttpSource
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -35,10 +37,10 @@ def kafka_consumer() -> KafkaConsumer:
     now = time.time()
     max_wait_seconds = 15
     while now - then < max_wait_seconds:
+        logging.info(
+            f"Attempting to create kafka consumer ({int(now - then)}/{max_wait_seconds} seconds)",
+        )
         try:
-            logging.info(
-                f"Attempting to create kafka consumer ({int(now - then)}/{max_wait_seconds} seconds)"
-            )
             return KafkaConsumer(
                 KAFKA_TOPIC,
                 bootstrap_servers=KAFKA_CONN_STR,
@@ -46,7 +48,7 @@ def kafka_consumer() -> KafkaConsumer:
             )
         except (KafkaError, ValueError) as error:
             logging.warning(error)
-            logging.warning(f"No conneciton to kafka from consumer. Retrying.")
+            logging.warning("No conneciton to kafka from consumer. Retrying.")
             now = time.time()
             time.sleep(1)
     raise TimeoutError()

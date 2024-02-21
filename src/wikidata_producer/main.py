@@ -12,7 +12,7 @@ app = typer.Typer()
 
 
 @app.command()
-def run(
+def run(  # noqa: WPS213
     kafka_conn_str: str,
     kafka_topic: str,
     redis_dsn: str,
@@ -36,11 +36,11 @@ def run(
     main_thread = Thread(target=daemon.run, daemon=True)
     try:
         main_thread.start()
-        main_thread.join()
     except KeyboardInterrupt:
         logging.info("Keyboard interrupt detected. Exiting.")
         main_thread.join(timeout=0)
         exit(0)
+    main_thread.join()
 
 
 if __name__ == "__main__":

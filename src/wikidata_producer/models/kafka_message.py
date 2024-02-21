@@ -1,23 +1,21 @@
-import json
-from typing import Generic, TypeVar
+import logging
+from typing import Any, Generic, TypeVar
 
-from wikidata_producer.models.json_serializable import JsonSerializable
-
-ContentModel = TypeVar("ContentModel", bound=JsonSerializable)
+ContentModel = TypeVar("ContentModel")
 
 
-class KafkaMessage(Generic[ContentModel], JsonSerializable):
-    content: ContentModel
+class KafkaMessage(Generic[ContentModel]):
+    body: ContentModel
     message_type: str
 
-    def __init__(self, content: ContentModel, message_type: str) -> None:
-        self.content = content
+    def __init__(self, body: ContentModel, message_type: str) -> None:
+        self.body = body
         self.message_type = message_type
 
-    def json(self) -> str:
-        return json.dumps(
-            {
-                "content": self.content.json(),
-                "message_type": self.message_type,
-            }
-        )
+    @property
+    def __dict__(self) -> dict[str, Any]:
+        logging.fatal(self.body.__dict__)
+        return {
+            "body": self.body.__dict__,
+            "message_type": self.message_type,
+        }

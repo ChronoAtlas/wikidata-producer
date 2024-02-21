@@ -4,7 +4,6 @@ from wikidata_producer.interchange.producer import Producer
 from wikidata_producer.interchange.query import WikidataQuery
 from wikidata_producer.interchange.redis_checksum_cache import RedisChecksumCache
 from wikidata_producer.interchange.wikidata_http_source import WikidataHttpSource
-from wikidata_producer.interchange.wikidata_kafka_producer import WikidataKafkaProducer
 from wikidata_producer.interchange.wikidata_source import WikidataSource
 
 __all__ = [
@@ -13,7 +12,6 @@ __all__ = [
     "Producer",
     "RedisChecksumCache",
     "WikidataHttpSource",
-    "WikidataKafkaProducer",
     "WikidataQuery",
     "WikidataSource",
 ]

@@ -12,20 +12,23 @@ class WikidataHttpSource(WikidataSource):
     def __init__(self) -> None:
         self.url: str = "https://query.wikidata.org/sparql"
 
-    def execute_sparql_query(self, query) -> list[dict[str, Any]]:
-        params = {
+    def execute_sparql_query(self, query: str) -> list[dict[str, Any]]:
+        params = {  # noqa: WPS110
             "query": query,
             "format": "json",
         }
         headers = {"Accept": "application/json"}
-        response = requests.get(self.url, headers=headers, params=params)
+        response = requests.get(self.url, headers=headers, params=params, timeout=5000)
         if response.ok:
             return response.json()["results"]["bindings"]
-        logging.error(f"HTTP {response.status} on {self.url}")
+        logging.error(f"HTTP {response.status_code} on {self.url}")
         return []
 
-    def get_battle_events(
-        self, date_start: str, date_end: str, limit: int | None = None
+    def fetch_battle_events(
+        self,
+        date_start: str,
+        date_end: str,
+        limit: int | None = None,
     ) -> list[BattleEvent]:
         query = WikidataQuery.BattlesByDate(limit=limit)
         raw_events = self.execute_sparql_query(query)

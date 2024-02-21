@@ -1,16 +1,12 @@
 import hashlib
-import json
-from typing import Any, Optional
 
 import flexidate
 
-from wikidata_producer.models.json_serializable import JsonSerializable
 
-
-class BattleEvent(JsonSerializable):  # noqa: WPS230
-    def __init__(
+class BattleEvent:  # noqa: WPS230
+    def __init__(  # noqa: WPS211
         self,
-        id: str,
+        identifier: str,
         name: str,
         date: float,
         location: str,
@@ -19,7 +15,7 @@ class BattleEvent(JsonSerializable):  # noqa: WPS230
         outcome: str | None,
         image_url_stub: str | None,
     ) -> None:
-        self.id = id
+        self.id = identifier
         self.name = name
         self.date = date
         self.location = location
@@ -30,10 +26,11 @@ class BattleEvent(JsonSerializable):  # noqa: WPS230
         self.checksum: str = self.generate_checksum()
 
     @classmethod
-    def from_wikidata_dict(
-        cls, wikidata_entry: dict[str, dict[str, str]]
+    def from_wikidata_dict(  # noqa: WPS210
+        cls,
+        wikidata_entry: dict[str, dict[str, str]],
     ) -> "BattleEvent":
-        id: str = wikidata_entry["battle"]["value"].split("/")[-1]
+        identifier: str = wikidata_entry["battle"]["value"].split("/")[-1]
         name: str = wikidata_entry["battleLabel"]["value"]
         date: float = flexidate.parse(wikidata_entry["date"]["value"]).as_float()
         location: str = wikidata_entry["locationLabel"]["value"]
@@ -60,7 +57,7 @@ class BattleEvent(JsonSerializable):  # noqa: WPS230
             else None
         )
         return cls(
-            id=id,
+            identifier=identifier,
             name=name,
             date=date,
             location=location,
@@ -70,13 +67,10 @@ class BattleEvent(JsonSerializable):  # noqa: WPS230
             image_url_stub=image_url_stub,
         )
 
-    def json(self) -> str:
-        return json.dumps(self.__dict__)
-
     def generate_checksum(self) -> str:
         str_repr = ""
         sorted_obj_keys = sorted(self.__dict__.keys())
-        for key in sorted_obj_keys:
-            str_repr += f"{key}:{self.__dict__[key]}"
+        for key in sorted_obj_keys:  # noqa: WPS519 linter has absolutely lost its mind
+            str_repr += f"{key}:{self.__dict__[key]}"  # noqa: WPS336
         hash_object = hashlib.sha256(str_repr.encode())
         return hash_object.hexdigest()
