@@ -1,14 +1,12 @@
-from threading import Thread
-from typing import Any
-
-from wikidata_producer.daemon import *
+from wikidata_producer.daemon import WikidataProducerDaemon
 from wikidata_producer.interchange import *
+from wikidata_producer.models import *
 
 
 class InMemoryCache(ChecksumCache):
     content = dict()
 
-    def get_message_type(self, battle_event: BattleEvent) -> KafkaMessageType:
+    def get_message_type(self, battle_event: BattleEvent) -> str:
         existing_checksum = self.content.get(battle_event.id)
         if existing_checksum is None:
             return KafkaMessageType.NewBattle
@@ -31,13 +29,13 @@ class OfflineWikidataSource(WikidataSource):
         return self.battle_events[:limit]
 
 
-class OfflineProducer:
+class OfflineProducer(Producer):
     def __init__(self) -> None:
         self.products: list[KafkaMessage] = []
 
     def produce(self, payload: KafkaMessage) -> None:
         self.products.append(payload)
-    
+
     def flush(self) -> None:
         pass  # noqa: WPS420
 
@@ -79,5 +77,5 @@ def test_daemon() -> None:
     daemon.tick()
 
     assert len(producer.products) == 2
-    assert producer.products[0].message_type.value == KafkaMessageType.NewBattle.value
-    assert producer.products[1].message_type.value == KafkaMessageType.BattleUpdate.value
+    assert producer.products[0].message_type == KafkaMessageType.NewBattle
+    assert producer.products[1].message_type == KafkaMessageType.BattleUpdate

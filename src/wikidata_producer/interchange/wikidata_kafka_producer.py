@@ -1,6 +1,6 @@
+import json
 import logging
 import time
-import json
 
 from kafka import KafkaProducer
 from kafka.errors import KafkaConnectionError
@@ -15,7 +15,7 @@ class WikidataKafkaProducer(Producer):
         self.topic = topic
         self.connection_str = connection_str
         self.connection: KafkaProducer | None = None
-    
+
     def serialize_value(self, value: dict) -> str:
         return json.dumps(value).encode("utf-8")
 

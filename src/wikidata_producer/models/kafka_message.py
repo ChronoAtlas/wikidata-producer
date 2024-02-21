@@ -1,6 +1,7 @@
-from typing import Any, Generic, TypeVar
+import json
+from typing import Generic, TypeVar
 
-from wikidata_producer.models import *
+from wikidata_producer.models.json_serializable import JsonSerializable
 
 ContentModel = TypeVar("ContentModel", bound=JsonSerializable)
 
@@ -13,8 +14,10 @@ class KafkaMessage(Generic[ContentModel], JsonSerializable):
         self.content = content
         self.message_type = message_type
 
-    def json(self) -> dict[str, Any]:
-        return {
-            "content": self.content.json(),
-            "message_type": self.message_type.value,
-        }
+    def json(self) -> str:
+        return json.dumps(
+            {
+                "content": self.content.json(),
+                "message_type": self.message_type,
+            }
+        )

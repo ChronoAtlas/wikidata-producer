@@ -1,11 +1,12 @@
 import logging
 from threading import Thread
 
-from redis import StrictRedis
 import typer
 
 from wikidata_producer import WikidataProducerDaemon
-from wikidata_producer import WikidataQuery
+from wikidata_producer.interchange import KafkaProducer
+from wikidata_producer.interchange import RedisChecksumCache
+from wikidata_producer.interchange import WikidataHttpSource
 
 app = typer.Typer()
 
@@ -27,15 +28,19 @@ def run(
     logging.info(f"  logging_level: {logging_level}")
 
     daemon = WikidataProducerDaemon(
-        producer=P,
-        redis_dsn=StrictRedis.from_url(
-            url=redis_dsn, encoding="utf-8", decode_responses=True
-        ),
+        producer=KafkaProducer(topic=kafka_topic, conn_str=kafka_conn_str),
+        wikidata=WikidataHttpSource(),
+        checksum_cache=RedisChecksumCache(dsn=redis_dsn),
         sleep_interval_seconds=sleep_interval,
     )
     main_thread = Thread(target=daemon.run, daemon=True)
-    main_thread.start()
-    main_thread.join()
+    try:
+        main_thread.start()
+        main_thread.join()
+    except KeyboardInterrupt:
+        logging.info("Keyboard interrupt detected. Exiting.")
+        main_thread.join(timeout=0)
+        exit(0)
 
 
 if __name__ == "__main__":

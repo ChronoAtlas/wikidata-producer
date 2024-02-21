@@ -29,5 +29,7 @@ class WikidataHttpSource(WikidataSource):
     ) -> list[BattleEvent]:
         query = WikidataQuery.BattlesByDate(limit=limit)
         raw_events = self.execute_sparql_query(query)
-        return [BattleEvent.from_wikidata_dict(wikidata_entry=raw_event) for raw_event in raw_events]
-
+        return [
+            BattleEvent.from_wikidata_dict(wikidata_entry=raw_event)
+            for raw_event in raw_events
+        ]

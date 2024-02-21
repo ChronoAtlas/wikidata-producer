@@ -1,4 +1,5 @@
 import hashlib
+import json
 from typing import Any, Optional
 
 import flexidate
@@ -14,9 +15,9 @@ class BattleEvent(JsonSerializable):  # noqa: WPS230
         date: float,
         location: str,
         wikipedia_url_stub: str,
-        coordinates: str,
-        outcome: str,
-        image_url_stub: str,
+        coordinates: str | None,
+        outcome: str | None,
+        image_url_stub: str | None,
     ) -> None:
         self.id = id
         self.name = name
@@ -29,7 +30,9 @@ class BattleEvent(JsonSerializable):  # noqa: WPS230
         self.checksum: str = self.generate_checksum()
 
     @classmethod
-    def from_wikidata_dict(cls, wikidata_entry: dict[str, dict[str, str]]) -> None:
+    def from_wikidata_dict(
+        cls, wikidata_entry: dict[str, dict[str, str]]
+    ) -> "BattleEvent":
         id: str = wikidata_entry["battle"]["value"].split("/")[-1]
         name: str = wikidata_entry["battleLabel"]["value"]
         date: float = flexidate.parse(wikidata_entry["date"]["value"]).as_float()
@@ -38,17 +41,17 @@ class BattleEvent(JsonSerializable):  # noqa: WPS230
             "https://en.wikipedia.org/wiki/",
             "",
         )
-        coordinates: Optional[str] = (
+        coordinates: str | None = (
             wikidata_entry["coordinates"]["value"]
             if "coordinates" in wikidata_entry
             else None
         )
-        outcome: Optional[str] = (
+        outcome: str | None = (
             wikidata_entry["outcomeLabel"]["value"]
             if "outcomeLabel" in wikidata_entry
             else None
         )
-        image_url_stub: Optional[str] = (
+        image_url_stub: str | None = (
             wikidata_entry["image"]["value"].replace(
                 "http://commons.wikimedia.org/wiki/Special:FilePath/",
                 "",
@@ -67,8 +70,8 @@ class BattleEvent(JsonSerializable):  # noqa: WPS230
             image_url_stub=image_url_stub,
         )
 
-    def json(self) -> dict[str, Any]:
-        return self.__dict__
+    def json(self) -> str:
+        return json.dumps(self.__dict__)
 
     def generate_checksum(self) -> str:
         str_repr = ""

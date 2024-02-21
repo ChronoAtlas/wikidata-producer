@@ -1,6 +1,3 @@
-from enum import Enum
-
-
-class KafkaMessageType(Enum):
+class KafkaMessageType:
     NewBattle = "NewBattle"
     BattleUpdate = "BattleUpdate"
