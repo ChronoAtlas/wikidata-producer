@@ -33,9 +33,9 @@ jobs:
     - name: Create package
       run: make pkg
     - name: Build image
-      run: docker build . -t cr.kruhlmann.dev/chrono-atlas/wikidata-producer --build-arg PYTHON_VERSION=${{ matrix.python-version }}
+      run: docker build . -t cr.kruhlmann.dev/chrono-atlas/wikidata-producer-python-${{ matrix.python-version }} --build-arg PYTHON_VERSION=${{ matrix.python-version }}
     - name: Publish image
-      run: docker push cr.kruhlmann.dev/chrono-atlas/wikidata-producer
+      run: docker push cr.kruhlmann.dev/chrono-atlas/wikidata-producer-python-${{ matrix.python-version }}
     - name: Upload package artifacts
       uses: actions/upload-artifact@v2
       with:
