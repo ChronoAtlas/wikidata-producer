@@ -8,6 +8,7 @@ class KafkaMessage:
     message_type: str
 
     def __init__(self, body: BattleEvent, message_type: str) -> None:
+        self.id = body.id
         self.battle_event = body
         self.message_type = message_type
 
