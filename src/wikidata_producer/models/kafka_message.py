@@ -1,19 +1,20 @@
-from typing import Any, Generic, TypeVar
+from typing import Any
 
-ContentModel = TypeVar("ContentModel")
+from wikidata_producer.models.battle_event import BattleEvent
 
 
-class KafkaMessage(Generic[ContentModel]):
-    body: ContentModel
+class KafkaMessage:
+    battle_event: BattleEvent
     message_type: str
 
-    def __init__(self, body: ContentModel, message_type: str) -> None:
-        self.body = body
+    def __init__(self, body: BattleEvent, message_type: str) -> None:
+        self.battle_event = body
         self.message_type = message_type
 
     @property
     def __dict__(self) -> dict[str, Any]:  # type: ignore
         return {
-            "body": self.body.__dict__,
+            "id": self.battle_event.id,
+            "body": self.battle_event.__dict__,
             "message_type": self.message_type,
         }

@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 from wikidata_producer.daemon import WikidataProducerDaemon
@@ -85,3 +86,5 @@ def test_daemon() -> None:
     assert len(producer.products) == 2
     assert producer.products[0]["message_type"] == KafkaMessageType.NewBattle
     assert producer.products[1]["message_type"] == KafkaMessageType.BattleUpdate
+
+    assert producer.products[0]["id"] == producer.products[0]["body"]["id"]
